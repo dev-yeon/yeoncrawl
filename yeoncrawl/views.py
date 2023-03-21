@@ -14,23 +14,43 @@ def crawldaangn(request):
     chrome_options.add_argument('--no-sandbox')
     chrome_options.add_argument('--disable-dev-shm-usage')
     driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
+    # 당근에 '성동구'를 검색하면 뜨는 정보를 selenium 으로 모사하기 위해서 driver.get  방식으로 불러온다
     driver.get('https://www.daangn.com/region/%EC%84%9C%EC%9A%B8%ED%8A%B9%EB%B3%84%EC%8B%9C/%EC%84%B1%EB%8F%99%EA%B5%AC')
+    # 너무많은 요청을 한번에 불러오면 내 url을 차단 할 수 있어서, 3초간 슬립을 걸어준다.
     time.sleep(3)
-    itemhtml = driver.page_source
-    itemsoup = BeautifulSoup(itemhtml, "html.parser")
-    items = itemsoup.select('article.card-top')
-    result = []
-    for i, item in enumerate(items):
+    item_html = driver.page_source
+    item_soup = BeautifulSoup(item_html, "html.parser")
+    # BeautifulSoup로 html을 다 불러온다.
+    items = item_soup.select('article.card-top')
+    # 'article.card-top'라는 형식으로 당근 마켓의 아이템들은 구성되어있다.
+    results = []
+    # 내가 넣은 아이템의 각각 값을 딕셔너리로 넣을 result 를 for문 외부에 넣는다.
+    # 크롬 우클릭 -> 검사-> 크롤링 할 해당 아이템 찾기-> copy ->copy XPath ..
+    # XPath를 어디 VSC, Sublime text 같은데 적어둔다.
+    for i, item in enumerate(items): # i는 0 부터 시작한다. items 개별 항목들 각각의 item에 숫자를 각각 붙여준다.
         new_item = read_item(item)
-        a_xpath = f'//*[@id="content"]/section[1]/article[{i+1}]/a'
-        a_button = driver.find_element(By.XPATH, a_xpath)
-        a_button.click()
-        a_item_html = driver.page_source
-        new_item.category = a_item_html.find('')
-        driver.back()
+        a_xpath = f'//*[@id="content"]/section[1]/article[{i+1}]/a' # 이게 아까 복사한 XPath , 규칙성이 보인다.
+        a_button = driver.find_element(By.XPATH, a_xpath) # selenium으로 클릭을 모사해야 하니, driver로 불러준다.
+        a_button.click() #클릭모사
+        time.sleep(2) # 로딩을 하는  시간을 줘야 읽는다 적어도 2초 이상은 줘야 한다.
+        a_item_html = driver.page_source # 클릭을 한번 해서 뜬 곳
+        a_item_soup = BeautifulSoup(a_item_html, "html.parser")
+        # BeautifulSoup로 a_item_html 을 다 불러온다.
+        new_item_name = a_item_soup.find('h1', id='article-title')  # 아이템의 이름
+        new_item_category = a_item_soup.find('p', id="article-category") #아이템의 카테고리
+        item_data = {
+            'new_item_name': new_item_name.text.strip(), # bs 고유의 메소드
+            'new_item_category': new_item_category.text.strip()
+        }
+        print(item_data)
+        time.sleep(1)
+        results.append(item_data)
+        driver.back() # 뒤로가기 클릭 모사
     buttons = driver.find_elements(By.CSS_SELECTOR, 'button.btn.btn-more-blue')
     print("crawlstart")
+    print(results)
     return HttpResponse("crawlDone")
+
 #             if 'clickLink' in car:
 #                 linksources = car['clickLink']
 #                 for linksource in linksources:
