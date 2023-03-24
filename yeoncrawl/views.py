@@ -1,109 +1,270 @@
-from bs4 import BeautifulSoup
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
+from selenium import webdriver as driver
 from selenium.webdriver.common.by import By
-from webdriver_manager.chrome import ChromeDriverManager
-import datetime
-import time
-from django.http import HttpResponse
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import time # 크롤링 중간 시간 지연
+import re # 크롤링 내용 정규식 전처리
+import json # 댓글 대댓글을 저장할 때, Json화 시키기 위함
+import pandas as pd
 
-def read_item(item):
-    return item
-def crawldaangn(request):
-    chrome_options = Options()
-    chrome_options.add_argument('--no-sandbox')
-    chrome_options.add_argument('--disable-dev-shm-usage')
-    driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
-    # 당근에 '성동구'를 검색하면 뜨는 정보를 selenium 으로 모사하기 위해서 driver.get  방식으로 불러온다
-    driver.get('https://www.daangn.com/region/%EC%84%9C%EC%9A%B8%ED%8A%B9%EB%B3%84%EC%8B%9C/%EC%84%B1%EB%8F%99%EA%B5%AC')
-    # 너무많은 요청을 한번에 불러오면 내 url을 차단 할 수 있어서, 3초간 슬립을 걸어준다.
-    time.sleep(3)
-    item_html = driver.page_source
-    item_soup = BeautifulSoup(item_html, "html.parser")
-    # BeautifulSoup로 html을 다 불러온다.
-    items = item_soup.select('article.card-top')
-    # 'article.card-top'라는 형식으로 당근 마켓의 아이템들은 구성되어있다.
-    results = []
-    # 내가 넣은 아이템의 각각 값을 딕셔너리로 넣을 result 를 for문 외부에 넣는다.
-    # 크롬 우클릭 -> 검사-> 크롤링 할 해당 아이템 찾기-> copy ->copy XPath ..
-    # XPath를 어디 VSC, Sublime text 같은데 적어둔다.
-    for i, item in enumerate(items): # i는 0 부터 시작한다. items 개별 항목들 각각의 item에 숫자를 각각 붙여준다.
-        new_item = read_item(item)
-        a_xpath = f'//*[@id="content"]/section[1]/article[{i+1}]/a' # 이게 아까 복사한 XPath , 규칙성이 보인다.
-        a_button = driver.find_element(By.XPATH, a_xpath) # selenium으로 클릭을 모사해야 하니, driver로 불러준다.
-        a_button.click() #클릭모사
-        time.sleep(2) # 로딩을 하는  시간을 줘야 읽는다 적어도 2초 이상은 줘야 한다.
-        a_item_html = driver.page_source # 클릭을 한번 해서 뜬 곳
-        a_item_soup = BeautifulSoup(a_item_html, "html.parser")
-        # BeautifulSoup로 a_item_html 을 다 불러온다.
-        new_item_name = a_item_soup.find('h1', id='article-title')  # 아이템의 이름
-        new_item_category = a_item_soup.find('p', id="article-category") #아이템의 카테고리
-        item_data = {
-            'new_item_name': new_item_name.text.strip(), # bs 고유의 메소드
-            'new_item_category': new_item_category.text.strip()
-        }
-        print(item_data)
-        time.sleep(1)
-        results.append(item_data)
-        driver.back() # 뒤로가기 클릭 모사
-    buttons = driver.find_elements(By.CSS_SELECTOR, 'button.btn.btn-more-blue')
-    print("crawlstart")
-    print(results)
-    return HttpResponse("crawlDone")
+user_id="id",
+user_passwd="passwd",
+login_option="facebook", # facebook or instagram
+driver_path="~/chromedriver",
+instagram_id_name="username",
+instagram_pw_name="password",
+instagram_login_btn=".sqdOP.L3NKy.y3zKF     ",
+facebook_login_page_css=".sqdOP.L3NKy.y3zKF     ",
+facebook_login_page_css2=".sqdOP.yWX7d.y3zKF     ",
+facebook_id_form_name="email",
+facebook_pw_form_name="pass",
+facebook_login_btn_name="login",
 
-#             if 'clickLink' in car:
-#                 linksources = car['clickLink']
-#                 for linksource in linksources:
-#                     linknum = linksource.split()
-#                     linkxpath = f'//*[@id="estimationModel"]/div[2]/div[1]/section/ul/li[{linknum[0]}]/div[{linknum[1]}]/label[{linknum[2]}]/span'
-#                     linkbutton = driver.find_element(By.XPATH, linkxpath)
-#                     driver.execute_script(f"window.scrollTo(0,0)")
-#                     linkbutton.click()
-#                     time.sleep(3)
-#                     trimhtml = driver.page_source
-#                     trim_buttons = driver.find_elements(By.CSS_SELECTOR, 'button.btn.btn-more-blue')
-#                     trimsoup = BeautifulSoup(trimhtml, "html.parser")
-#                     temp_trims = trimsoup.select('article.list-article')
-#                     if temp_trims:
-#                         for trim, button in zip(temp_trims, trim_buttons):
-#                             temp_trim = maketrims(trim, driver, button)
-#                             print(temp_trim['trim_name'])
-#                             result_trims['trims'].append(temp_trim)
-#         results.append(result_trims)
-#     temp_crawldata.jsondata = results
-#     temp_crawldata.save()
-#
-#
-# def maketrims(trim, driver, button):
-#     trim_name = trim.find('h4')
-#     trim_price = trim.find('span', class_="price")
-#     trim_images = trim.findAll('img')
-#     action = ActionChains(driver)
-#     result_trim = {'trim_name': trim_name.text, 'trim_price': trim_price.text.replace("\n", "")}
-#     for i, image in enumerate(trim_images):
-#         imgname = f'img{i}'
-#         imgsrc = f'imgsrc{i}'
-#         result_trim[imgname] = image['alt']
-#         result_trim[imgsrc] = f'https://www.hyundai.com{image["src"]}'
-#     result_trim['option'] = []
-#     action.move_to_element(button).perform()
-#     button.click()
-#     time.sleep(3)
-#     # driver.switch_to_window(driver.window_handles[1])
-#     option_buttons = driver.find_elements(By.CSS_SELECTOR, 'button.list-title')
-#     for option_button in option_buttons:
-#         option_button.click()
-#         time.sleep(1)
-#     optionhtml = driver.page_source
-#     optionsoup = BeautifulSoup(optionhtml, "html.parser")
-#     options = optionsoup.select('div.list-item.active')
-#     for option in options:
-#         temp_option = {"label": option.find('div', class_="title").text.strip()}
-#         plist = option.findAll('p', class_="dot")
-#         for i, p in enumerate(plist):
-#             temp_option[i] = p.text.strip()
-#         result_trim['option'].append(temp_option)
-#     close_button = driver.find_element(By.XPATH, '/html/body/div[3]/div/div[2]/button')
-#     close_button.click()
-#     time.sleep(3)
-#     return result_trim
+print(f"login start - option {login_option}")
+
+login_url = "https://www.instagram.com/accounts/login/"
+driver.get(login_url)
+time.sleep(10)
+if login_option == "instagram":
+
+    try:
+        instagram_id_form = driver.find_element_by_name(instagram_id_name)
+        instagram_id_form.send_keys(user_id)
+        time.sleep(5)
+
+        instagram_pw_form = driver.find_element_by_name(instagram_pw_name)
+        instagram_pw_form.send_keys(user_passwd)
+        time.sleep(7)
+
+        login_ok_button = driver.find_element_by_css_selector(instagram_login_btn)
+        login_ok_button.click()
+        is_login_success = True
+    except:
+        print("instagram login fail")
+        is_login_success = False
+
+if login_option == "instagram":
+    try:
+        instagram_id_form = driver.find_element_by_name(instagram_id_name)
+        instagram_id_form.send_keys(user_id)
+        time.sleep(5)
+
+        instagram_pw_form = driver.find_element_by_name(instagram_pw_name)
+        instagram_pw_form.send_keys(user_passwd)
+        time.sleep(7)
+
+        login_ok_button = driver.find_element_by_css_selector(instagram_login_btn)
+        login_ok_button.click()
+        is_login_success = True
+
+    except:
+        print("instagram login fail")
+        is_login_success = False
+
+time.sleep(10)
+url="https://www.instagram.com/"
+driver.get(url)
+time.sleep(10)
+
+# 첫번째 게시물
+first_img_css="div.v1Nh3.kIKUG._bz0w"
+driver.find_element_by_css_selector(first_img_css).click()
+# data lists
+location_infos = []
+location_hrefs = []
+upload_ids = []
+date_texts = []
+date_times = []
+date_titles = []
+main_texts = []
+instagram_tags = []
+comments = []
+check_arrow = True  # 다음 게시물 버튼이 있는지 없는지 여부를 체크
+
+count_extract = 0 # 현재 몇개의 게시물을 추출 했는지 체크
+
+wish_num = 10 # 최종적으로 몇개의 게시물을 추출할 것인지에 대한 변수
+
+
+instagram_tag_dates = []
+
+location_object_css="div.o-MQd.z8cbW > div.M30cS > div.JF9hh > a.O4GlU"
+upload_id_object_css="div.e1e1d > span.Jv7Aj.MqpiF  > a.sqdOP.yWX7d._8A5w5.ZIAjV "
+date_object_css="div.k_Q0X.NnvRN > a.c-Yi7 > time._1o9PC.Nzb55"
+main_text_object_css="div.C7I1f.X7jCj > div.C4VMK > span"
+tag_css=".C7I1f.X7jCj"
+comment_more_btn="button.dCJp8.afkep"
+comment_ids_objects_css="ul.Mr508 > div.ZyFrc > li.gElp9.rUo9f > div.P9YgZ > div.C7I1f > div.C4VMK > h3"
+comment_texts_objects_css="ul.Mr508 > div.ZyFrc > li.gElp9.rUo9f > div.P9YgZ > div.C7I1f > div.C4VMK > span"
+print_flag=False
+next_arrow_btn_css1="._65Bje.coreSpriteRightPaginationArrow"
+next_arrow_btn_css2="._65Bje.coreSpriteRightPaginationArrow"
+
+while True:
+    if count_extract > wish_num:
+        break
+    time.sleep(5.0)
+    # 위치정보
+
+    if check_arrow == False:
+        break
+
+    try:
+        location_object = driver.find_element_by_css_selector(location_object_css)
+        location_info = location_object.text
+        location_href = location_object.get_attribute("href")
+    except:
+        location_info = None
+        location_href = None
+
+    # 올린사람 ID
+    try:
+        upload_id_object = driver.find_element_by_css_selector(upload_id_object_css)
+        upload_id = upload_id_object.text
+    except:
+        upload_id = None
+
+
+    # 날짜
+    try:
+        date_object = driver.find_element_by_css_selector(date_object_css)
+        date_text = date_object.text
+        date_time = date_object.get_attribute("datetime")
+        date_title = date_object.get_attribute("title")
+    except:
+        date_text = None
+        date_time = None
+        date_title = None
+
+
+    # 본문
+    try:
+        main_text_object = driver.find_element_by_css_selector(main_text_object_css)
+        main_text = main_text_object.text
+    except:
+        main_text = None
+
+
+    ## 본문 속 태그
+    try:
+        data = driver.find_element_by_css_selector(tag_css) # C7I1f X7jCj
+        tag_raw = data.text
+        tags = re.findall('#[A-Za-z0-9가-힣]+', tag_raw)
+        tag = ''.join(tags).replace("#"," ") # "#" 제거
+
+        tag_data = tag.split()
+
+        for tag_one in tag_data:
+            instagram_tags.append(tag_one)
+    except:
+        continue
+
+
+    # 댓글
+    ## 더보기 버튼 클릭
+    try:
+        while True:
+            try:
+                more_btn = driver.find_element_by_css_selector(comment_more_btn)
+                more_btn.click()
+            except:
+                break
+    except:
+        print("----------------------fail to click more btn----------------------------------")
+        continue
+
+    ## 댓글 데이터
+    try:
+        comment_data = {}
+
+        comment_ids_objects = driver.find_elements_by_css_selector(comment_ids_objects_css)
+
+        comment_texts_objects = driver.find_elements_by_css_selector(comment_texts_objects_css)
+
+
+
+        try:
+            for i in range(len(comment_ids_objects)):
+                comment_data[str((i+1))] = {"comment_id":comment_ids_objects[i].text, "comment_text":comment_texts_objects[i].text}
+        except:
+            print("fail")
+
+    except:
+        comment_id = None
+        comment_text = None
+        comment_data = {}
+        try:
+            if comment_data != {}:
+                keys = list(comment_data.keys())
+
+                for key in keys:
+                    if comment_data[key]['comment_id'] == upload_id:
+                        tags = re.findall('#[A-Za-z0-9가-힣]+', comment_data[key]['comment_text'])
+                        tag = ''.join(tags).replace("#"," ") # "#" 제거
+
+                        tag_data = tag.split()
+
+                        for tag_one in tag_data:
+                            instagram_tags.append(tag_one)
+        except:
+            continue
+
+
+
+location_infos.append(location_info)
+location_hrefs.append(location_href)
+
+upload_ids.append(upload_id)
+
+date_texts.append(date_text)
+date_times.append(date_time)
+date_titles.append(date_title)
+
+main_texts.append(main_text)
+
+comment_json = json.dumps(comment_data)
+
+comments.append(comment_json)
+
+if print_flag:
+    print("location_info : ", location_info)
+    print("location_href : ", location_href)
+    print("upload id : ", upload_id)
+    print("date : {} {} {}".format(date_text, date_time, date_title))
+    print("main : ", main_text)
+    print("comment : ", comment_data)
+
+    print("insta tags : ", instagram_tags)
+
+try:
+    WebDriverWait(driver, 100).until(EC.presence_of_element_located((By.CSS_SELECTOR, next_arrow_btn_css1)))
+    driver.find_element_by_css_selector(next_arrow_btn_css2).click()
+except:
+    check_arrow = False
+
+    count_extract += 1
+
+    save_file_name="instagram_extract"
+    save_file_name_tag="instagram_tag"
+
+try:
+    insta_info_df = pd.DataFrame({"location_info":location_infos, "location_href":location_hrefs, "upload_id":upload_ids, "date_text":date_texts, "date_time":date_times, "date_title":date_titles, "main_text":main_texts, "comment":comments})
+    insta_info_df.to_csv("{}.csv".format(save_file_name), index=False)
+except:
+    print("fail to save data")
+
+
+try:
+    insta_tag_df = pd.DataFrame({"tag":instagram_tags})
+    insta_tag_df.to_csv("{}.csv".format(save_file_name_tag), index=False)
+except:
+    print("fail to save tag data")
+
+driver.close()
+driver.quit()
+
+#  본 코드는
+# https://somjang.tistory.com/entry/Python-Selenium%EC%9D%84-%ED%99%9C%EC%9A%A9%ED%95%98%EC%97%AC-%EC%9D%B8%EC%8A%A4%ED%83%80%EA%B7%B8%EB%9E%A8-%ED%81%AC%EB%A1%A4%EB%A7%81-%ED%95%98%EA%B8%B0
+# 를 참조하였습니다.
+
+# https://github.com/SOMJANG/Instagram_Crawler

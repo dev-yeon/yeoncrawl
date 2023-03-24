@@ -36,7 +36,7 @@ def crawlyoutube(request):
         last_height = new_height
 
     you_html = driver.page_source
-    # BeautifulSoup로 html을 다 불러온다.
+    # BeautifulSoup로 html 을 다 불러 온다.
     you_soup = BeautifulSoup(you_html, "html.parser")
     videos = you_soup.select('div',  "dismissible.style-scope.ytd-video-renderer")
     # 'div#dismissible.style-scope.ytd-video-renderer' 라는 형식 으로 유튜브 의 비디오 목록 들은 구성 되어 있다.
@@ -46,7 +46,7 @@ def crawlyoutube(request):
     # XPath 를 어디 VSC, Sublime text 같은데 적어 둔다.
     n = 3
     while n > 0:
-        print('웹페이지를 불러오는 중입니다..' + '..' * n)
+        print('웹 페이지 를 불러오는 중 입니다..' + '..' * n)
         time.sleep(1)
         n -= 1
         for i, video in enumerate(videos):   # i는 0 부터 시작 한다. items 개별 항목들 각각의 item 에 숫자를 각각 붙여 준다.

@@ -84,15 +84,18 @@ def get_video(request):
 
     driver.close()
 
+    """
+
     result = input('데이터프레임 저장이 완료 되었습니다! 데이터프레임을 조회 하시겠습니까? (y/n)')
     if result == 'y':
         display(df_just_video)
         question = input('원하는 영상을 재생 하시겠습니까? (y/n)')
         if question == 'y':
             button = int(input('재생 하고자 하는 영상의 번호(출력된 표 가장 왼쪽의 번호)를 입력 해주세요.'))
-            driver = webdriver.Chrome(path)
+            driver = webdriver.Chrome()
             driver.get(df_just_video['영상url'][button])
         else:
             return '프로그램 을 종료 합니다.'
     else:
         return '프로그램 을 종료 합니다.'
+"""

@@ -20,5 +20,8 @@ import yeoncrawl.views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('daangn/', yeoncrawl.views.crawldaangn)
+
+    path('you/', yeoncrawl.views.crawlyoutube)
 ]
+
+#path('daangn/', yeoncrawl.views.crawldaangn)
