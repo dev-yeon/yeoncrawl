@@ -15,13 +15,16 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-
+import yeoncrawl.korean
+import yeoncrawl.insta
 import yeoncrawl.views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-
-    path('you/', yeoncrawl.views.crawlyoutube)
+   # path('kor/', yeoncrawl.korean.all_kor_repeat)
+   # path('you/', yeoncrawl.views.crawlyoutube)
+   # path('korean/', yeoncrawl.korean.korean_repeat),
+    path('insta/', yeoncrawl.insta.insta_crawl)
 ]
 
 #path('daangn/', yeoncrawl.views.crawldaangn)
