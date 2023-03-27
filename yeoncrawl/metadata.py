@@ -1,60 +1,22 @@
-EXTRACT_NUM = 10
-# LOGIN_OPTION = "facebook"
+# 대문자로 해놓는건 안바뀌는 것
+EXTRACT_NUM = 30
 # DRIVER_PATH
 HASH_TAG = "팬케이크"
 # 로그인 URL
 LOGIN_URL = "https://www.instagram.com/accounts/login/"
 CONTENT_URL = "https://www.instagram.com/explore/tags/"
-# CONTENT_URL = "https://www.instagram.com/explore/tags/"
 
+# 로그인 ID, PW
 INSTAGRAM_ID = "snobx0x"
 INSTAGRAM_PW = "qwer12134"
+
 # 제일 처음에 뜨는 인기순 사진
-HAYA9_CSS = "div._aabd._aa8k._al3l"
-HAYA9_NEXT_CURSER = ""
-HAYA9_1_PIC = ""
-HAYA9_2_PIC = ""
-HAYA9_3_PIC = ""
-HAYA9_4_PIC = ""
-HAYA9_5_PIC = ""
-HAYA9_6_PIC = ""
-HAYA9_7_PIC = ""
-HAYA9_8_PIC = ""
-HAYA9_9_PIC = ""
-HAYA9_10_PIC = ""
+
+
+
 # 최대 10 장 저장이 가능하다 .
 
 
-#
-HAYA9_UPLOAD_ID = ""
-HAYA9_UPLOAD_LOCATION = ""
-HAYA9_UPLOAD_TXT = ""
-HAYA9_HASHTAG = ""
-HAYA9_LIKES = ""
-HAYA9_DATE = ""
-
-
-#
-RECENT_INSTA_CSS = ""
-RECENT_INSTA_NEXT_CURSER = ""
-RECENT_INSTA_1_PIC = ""
-RECENT_INSTA_2_PIC = ""
-RECENT_INSTA_3_PIC = ""
-RECENT_INSTA_4_PIC = ""
-RECENT_INSTA_5_PIC = ""
-RECENT_INSTA_6_PIC = ""
-RECENT_INSTA_7_PIC = ""
-RECENT_INSTA_8_PIC = ""
-RECENT_INSTA_9_PIC = ""
-RECENT_INSTA_10_PIC = ""
-
-#
-RECENT_INSTA_UPLOAD_ID = ""
-RECENT_INSTA_UPLOAD_LOCATION = ""
-RECENT_INSTA_UPLOAD_TXT = ""
-RECENT_INSTA_UPLOAD_HASHTAG = ""
-RECENT_INSTA_UPLOAD_LIKES = ""
-RECENT_INSTA_UPLOAD_DATE = ""
 
 
 

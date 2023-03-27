@@ -24,7 +24,7 @@ urlpatterns = [
    # path('kor/', yeoncrawl.korean.all_kor_repeat)
    # path('you/', yeoncrawl.views.crawlyoutube)
    # path('korean/', yeoncrawl.korean.korean_repeat),
-    path('insta/', yeoncrawl.insta.insta_crawl)
+    path('insta/', yeoncrawl.insta.insta_soup)
 ]
 
 #path('daangn/', yeoncrawl.views.crawldaangn)

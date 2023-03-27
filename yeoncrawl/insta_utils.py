@@ -4,7 +4,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium import webdriver
 from bs4 import BeautifulSoup
 import time
-import metadata
+import yeoncrawl.metadata
 from django.http import HttpResponse
 
 
