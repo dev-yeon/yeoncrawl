@@ -2,7 +2,9 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
-from yeoncrawl.insta_utils import driver
+
+import yeoncrawl.insta_utils
+
 import yeoncrawl.metadata as metadata
 from bs4 import BeautifulSoup
 import time
@@ -14,17 +16,20 @@ def read_item(item):
 # 인스타의 html 코드를 insta_soup 에 넣기
 def insta_soup(request):
     # 웹 드라이버 실행
-    chrome_options = Options()
-    chrome_options.add_argument(
-        'user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36')
+    #chrome_options = Options()
+    #chrome_options.add_argument(
+    #    'user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36')
 
-    driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
+   # driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
+
+    driver = yeoncrawl.insta_utils.driver(request)
 
     # 인스타그램 접속
     driver.get(metadata.LOGIN_URL)
     time.sleep(2)
 
     # 로그인
+    """
     username = metadata.INSTAGRAM_ID
     time.sleep(1)
     password = metadata.INSTAGRAM_PW
@@ -34,6 +39,8 @@ def insta_soup(request):
     driver.find_element(By.NAME, 'password').send_keys(password)
     driver.find_element(By.CSS_SELECTOR, 'button[type=submit]').click()
     time.sleep(3)
+    """
+    login = yeoncrawl.insta_utils.instagram_login(request)
 
     # 해시태그 검색
 
@@ -52,10 +59,12 @@ def insta_soup(request):
     return item_soup
 
 # 인기게시물 9개 읽기 (하드코딩)
-def hayatteru_9():
+def hayatteru_9(request):
+    driver = yeoncrawl.insta_utils.driver(request)
     for j in range(1, 4):
         for k in range(1, 4):
             i_path = f'//*[@id="mount_0_0_fC"]/div/div/div[1]/div/div/div/div[1]/div[1]/div[2]/section/main/article/div[1]/div/div/div[{j}]/div[{k}]'
+
             i_button = driver.find_element(By.XPATH, i_path)
             i_button.click()
             time.sleep(3)
@@ -65,10 +74,10 @@ def hayatteru_9():
             haya_item_html = driver.page_source
             haya_item_soup = BeautifulSoup(haya_item_html, "html.parser")
 # //*[@id="mount_0_0_Zl"]/div/div/div[2]/div/div/div[1]/div/div[3]/div/div/div/div/div[2]/div/article/div/div[1]/div/div[1]/div[2]/div/div/div/ul/li[2]/div/div/div/div/div[1]/div[1]/img
-            haya_1pic = haya_item_soup.find('img', class_ = 'x5yr21d xu96u03 x10l6tqk x13vifvy x87ps6o xh8yej3')
-            haya_1pic_url = haya_item_soup.find('img', class_ ='x5yr21d xu96u03 x10l6tqk x13vifvy x87ps6o xh8yej3')
-            haya_upload_id = haya_item_soup.find('div', class_ = 'xt0psk2')
-            haya_upload_location = haya_item_soup.find('a', class_ = 'x1i10hfl xjbqb8w x6umtig x1b1mbwd xaqea5y xav7gou x9f619 x1ypdohk xt0psk2 xe8uvvx xdj266r x11i5rnm xat24cr x1mh8g0r xexx8yu x4uap5 x18d9i69 xkhd6sd x16tdsg8 x1hl2dhg xggy1nq x1a2a7pz _aaqk _a6hd')
+            haya_1pic = haya_item_soup.find('img', class_='x5yr21d xu96u03 x10l6tqk x13vifvy x87ps6o xh8yej3')
+            haya_1pic_url = haya_item_soup.find('img', class_='x5yr21d xu96u03 x10l6tqk x13vifvy x87ps6o xh8yej3')
+            haya_upload_id = haya_item_soup.find('div', class_='xt0psk2')
+            haya_upload_location = haya_item_soup.find('a', class_= 'x1i10hfl xjbqb8w x6umtig x1b1mbwd xaqea5y xav7gou x9f619 x1ypdohk xt0psk2 xe8uvvx xdj266r x11i5rnm xat24cr x1mh8g0r xexx8yu x4uap5 x18d9i69 xkhd6sd x16tdsg8 x1hl2dhg xggy1nq x1a2a7pz _aaqk _a6hd')
 
             haya_upload_txt = haya_item_soup.find('h1', class_= "_aacl _aaco _aacu _aacx _aad7 _aade")
             haya_hash_tags = haya_item_soup.find('a', class_= "x1i10hfl xjbqb8w x6umtig x1b1mbwd xaqea5y xav7gou x9f619 x1ypdohk xt0psk2 xe8uvvx xdj266r x11i5rnm xat24cr x1mh8g0r xexx8yu x4uap5 x18d9i69 xkhd6sd x16tdsg8 x1hl2dhg xggy1nq x1a2a7pz  _aa9_ _a6hd")
