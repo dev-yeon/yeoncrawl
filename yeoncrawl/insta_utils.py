@@ -12,13 +12,11 @@ def driver(request):
     chrome_options = Options()
     chrome_options.add_argument(
         'user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36')
-
     driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
     return driver
 
 
 def instagram_login(request):
-    is_login_done = False
     # 인스타그램 접속
     driver(request).get('https://www.instagram.com/accounts/login/')
     time.sleep(2)

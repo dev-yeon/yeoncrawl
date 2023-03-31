@@ -1,6 +1,7 @@
 # 대문자로 해놓는건 안바뀌는 것
 EXTRACT_NUM = 30
 # DRIVER_PATH
+
 HASH_TAG = "팬케이크"
 # 로그인 URL
 LOGIN_URL = "https://www.instagram.com/accounts/login/"
