@@ -21,9 +21,6 @@ import yeoncrawl.views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-   # path('kor/', yeoncrawl.korean.all_kor_repeat)
-   # path('you/', yeoncrawl.views.crawlyoutube)
-   # path('korean/', yeoncrawl.korean.korean_repeat),
     path('insta/', yeoncrawl.insta.insta_soup)
 ]
 
