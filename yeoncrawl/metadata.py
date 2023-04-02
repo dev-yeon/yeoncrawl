@@ -1,9 +1,4 @@
 # 대문자로 해놓는건 안바뀌는 것
-from selenium.webdriver.common.by import By
-
-
-import yeoncrawl.insta
-
 EXTRACT_NUM = 30
 # DRIVER_PATH
 
@@ -35,13 +30,18 @@ IMG_LIST = "div"
 # 다음 사진을 갈 수 있는 화살표.
 NEXT_ARROW_BTN= "button._afxw._al46._al47"
 
+# 최대 10 장 저장이 가능하다 .
 
 
+
+
+
+LOCATION_CSS =""
 HASH_TAG_CSS = ""
 DATE_CSS =""
 MAIN_TEXT_CSS = ""
 
-
+NEXT_ARROW_BTN_CSS_1=""
 
 
 SAVE_FILE_NAME="instagram_extract"

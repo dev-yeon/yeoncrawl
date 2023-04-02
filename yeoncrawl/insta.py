@@ -7,8 +7,8 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
-
-import yeoncrawl.metadata as data
+import yeoncrawl.insta_utils
+import yeoncrawl.metadata as metadata
 from bs4 import BeautifulSoup
 from selenium.webdriver.chrome.options import Options
 from selenium import webdriver
@@ -53,12 +53,12 @@ def instagram_login():
     driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
 
     # 인스타그램 접속
-    driver.get(data.LOGIN_URL)
+    driver.get(metadata.LOGIN_URL)
     time.sleep(2)
     # 로그인
-    username = data.INSTAGRAM_ID
+    username = 'snobx0x'
     time.sleep(1)
-    password = data.INSTAGRAM_PW
+    password = 'qwer12134'
     time.sleep(1)
     login = driver.find_element(By.NAME, "username")
     login.send_keys(username)
@@ -86,7 +86,7 @@ def insta_soup(request):
 
 
     # 해시태그 검색
-    driver.get(f"{data.CONTENT_URL}{data.HASH_TAG}/")
+    driver.get(f"{metadata.CONTENT_URL}{metadata.HASH_TAG}/")
     print("hashtag")
     time.sleep(30)
     # 게시물 가져오기
@@ -104,11 +104,13 @@ def insta_soup(request):
     for j in range(1, 4):
         for k in range(1, 4):
             i_path = f'//*[@id="{idstring}"]/div/div/div[1]/div/div/div/div[1]/div[1]/div[2]/section/main/article/div[1]/div/div/div[{j}]/div[{k}]'
+                   # f'//*[@id="{idstring}"]/div/div/div[1]/div/div/div/div[1]/div[1]/div[2]/section/main/article/div[2]/div/div[{l}]/div[{m}]'
             i_button = driver.find_element(By.XPATH, i_path)
 
             i_button.click()
             time.sleep(3)
             temp_post = Post()
+
             temp_postimg = PostImg()   # 새로운 이미지 저장할 그릇 생성
             temp_post.save()  # 한번 세이브 해서 일단 Post db에 새로운 데이터 생성
             temp_postimg.save()
@@ -146,6 +148,7 @@ def insta_soup(request):
 
 
             # 인기 게시글을 보기위한  스크롤 내리기 구현
+
     driver.execute_script("window.scrollTo(0, 700)")
     time.sleep(3)
     for l in range(1, 9):
@@ -181,8 +184,28 @@ def insta_soup(request):
             temp_postimg.save()
             temp_post.img_list.add(temp_postimg)
             temp_post.save()
+
             driver.back()
         driver.execute_script("window.scrollTo(0, 700)")
         time.sleep(3)
     return item_soup
 
+# 인기게시물 9개 읽기 (하드코딩)
+def hayatteru_9(request):
+    driver = yeoncrawl.insta_utils.driver(request)
+
+    for j in range(1, 4):
+        for k in range(1, 4):
+            i_path = f'//*[@id="mount_0_0_fC"]/div/div/div[1]/div/div/div/div[1]/div[1]/div[2]/section/main/article/div[1]/div/div/div[{j}]/div[{k}]'
+            i_button = driver.find_element(By.XPATH, i_path)
+            i_button.click()
+            time.sleep(3)
+            temp_post = Post()  # models 의 Post 호출
+            temp_post.save() #한번 세이브해서 일단 Post db에 새로운 데이터 생성
+            #  ------------------------
+            temp_postimg = PostImg()  # 새로운 이미지 저장할 그릇 생성
+            temp_postimg.img_url = ['srcset', 'x5yr21d xu96u03 x10l6tqk x13vifvy x87ps6o xh8yej3']
+            temp_postimg.save()
+            temp_post.img_list.add(temp_postimg)
+            temp_post.save()
+            count = 0
