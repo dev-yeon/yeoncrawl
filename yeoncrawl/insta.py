@@ -54,16 +54,30 @@ def insta_soup(request):
             i_button = driver.find_element(By.XPATH, i_path)
             i_button.click()
             time.sleep(3)
+            """
             temp_post = Post()
+            data.STD_IMG_URL 
             temp_postimg = PostImg()   # 새로운 이미지 저장할 그릇 생성
             temp_post.save()  # 한번 세이브 해서 일단 Post db에 새로운 데이터 생성
             temp_postimg.save()
+            """
+
             # 클릭을 한번 해서 뜬 곳
             item_soup = BeautifulSoup(driver.page_source, "html.parser")
             # BeautifulSoup로  클릭 해서 뜬 곳 html
+            postlist = item_soup.select("ul", class_="_acay")
+            for post in postlist:
+                img_list = post.findAll('img')
+                for img in img_list:
+                    print(img["src"])
+
+            # std_img_url = item_soup.find('img', class_=data.STD_IMG_URL)
+            # print(std_img_url)
             #std_img_url = item_soup.find('div', class_="_aagv") # 처음 뜬 img url 주소
+            """
 
             std_img_url = driver.find_elements(By.CSS_SELECTOR, data.STD_IMG_URL)
+            
             print(std_img_url)
 
             # author_id = item_soup.find('div', class_="xt0psk2")   # 작성자 id
@@ -89,6 +103,9 @@ def insta_soup(request):
             temp_postimg.save()
             temp_post.img_list.add(temp_postimg)
             temp_post.save()
+            """
+
+
 
             driver.back()
             # 인기 게시글을 보기위한  스크롤 내리기 구현

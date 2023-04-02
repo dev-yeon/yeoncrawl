@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-import yeoncrawl.korean
+
 import yeoncrawl.insta
 import yeoncrawl.views
 
@@ -24,4 +24,3 @@ urlpatterns = [
     path('insta/', yeoncrawl.insta.insta_soup)
 ]
 
-#path('daangn/', yeoncrawl.views.crawldaangn)
