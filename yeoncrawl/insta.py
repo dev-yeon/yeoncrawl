@@ -1,14 +1,37 @@
-
+from elasticsearch import Elasticsearch, helpers
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
-
-
+from django.http import HttpResponse
 import yeoncrawl.metadata as data
 from bs4 import BeautifulSoup
 from selenium.webdriver.chrome.options import Options
 from selenium import webdriver
 import time
+import os
 from .models import Post, PostImg
+from .serializers import PostImgSerializer
+
+port = 9200
+elasticsearch_hosts = [
+    'https://search-yeon-emiary-ljdngztcn7zfrs5tot3rzzpkki.ap-northeast-2.es.amazonaws.com',
+]
+elasticsearch_id = 'yeon'
+elasticsearch_password = os.environ['ES_PASSWORD']
+auth = (elasticsearch_id, elasticsearch_password)
+def gen_postimg(index):
+    postimgs = PostImg.objects.all()
+    for postimg in postimgs:
+        serializers = PostImgSerializer(postimg)
+        result = serializers.data
+        result.update({"_index": index})
+        result.update({"_id": postimg.id})
+        yield result
+
+def bulk_direct_postimg(request):
+    es = Elasticsearch(hosts=elasticsearch_hosts, post=port, http_auth=auth)
+    response = helpers.bulk(es, gen_postimg("insta_postimg"))
+    return HttpResponse(f'bulk to es Done with {response}')
+
 
 def instagram_login():
     chrome_options = Options()
@@ -31,13 +54,14 @@ def instagram_login():
 
     return driver
 
+
 # 인스타의 html 코드를 insta_soup 에 넣기
 def insta_soup(request):
     driver = instagram_login()
     # 해시태그 검색
     driver.get(f"{data.CONTENT_URL}{data.HASH_TAG}/")
     print("hashtag")
-    time.sleep(30)
+    time.sleep(15)
     # 게시물 가져오기
     divs = driver.find_elements(By.TAG_NAME, "div")
     idstring=""
@@ -65,45 +89,26 @@ def insta_soup(request):
             # 클릭을 한번 해서 뜬 곳
             item_soup = BeautifulSoup(driver.page_source, "html.parser")
             # BeautifulSoup로  클릭 해서 뜬 곳 html
-            postlist = item_soup.select("ul", class_="_acay")
-            for post in postlist:
-                img_list = post.findAll('img')
-                for img in img_list:
-                    print(img["src"])
-
-            # std_img_url = item_soup.find('img', class_=data.STD_IMG_URL)
-            # print(std_img_url)
-            #std_img_url = item_soup.find('div', class_="_aagv") # 처음 뜬 img url 주소
-            """
-
-            std_img_url = driver.find_elements(By.CSS_SELECTOR, data.STD_IMG_URL)
-            
-            print(std_img_url)
-
-            # author_id = item_soup.find('div', class_="xt0psk2")   # 작성자 id
-            author_id = driver.find_elements(By.CSS_SELECTOR, data.AUTHOR_ID)
-            print(author_id)
-
-            post_desc = driver.find_elements(By.CSS_SELECTOR, data.POST_DESC)
-            print(post_desc)
-
-            location = driver.find_elements(By.CSS_SELECTOR, data.LOCATION)
-            print(location)
-
-            like_count = driver.find_elements(By.CSS_SELECTOR, data.LIKE_COUNT)
-            print(like_count)
-
-            post_date = driver.find_elements(By.CSS_SELECTOR, data.POST_DATE)
-            print(post_date)
-
-            img_list = driver.find_elements(By.CSS_SELECTOR,data.POST_DATE)
-            print(img_list)
-
-            time.sleep(2)
-            temp_postimg.save()
-            temp_post.img_list.add(temp_postimg)
-            temp_post.save()
-            """
+            postimglist = item_soup.select("ul", class_="_acay")
+            for postimg in postimglist:
+                # if postimg:
+                    img_list = postimg.findAll('img')
+                    for img in img_list:
+                        temp_postimg = PostImg()
+                        temp_postimg.img_url = img["src"]
+                        temp_postimg.img_alt = img["alt"]
+                        if not temp_postimg.img_alt.__contains__("프로필"):
+                            temp_postimg.save()
+            postdescs = item_soup.select("ul", class_="_a9z6._a9za")
+            if postdescs:
+                for postdesc in postdescs:
+                    desclist = postdesc.findAll('ul', class_="_a9ym")
+                    creatordescpost = postdesc.find('div', class_="x1qjc9v5.x6umtig.x1b1mbwd.xaqea5y.xav7gou.x9f619.x78zum5.xdt5ytf.x2lah0s.xk390pu.xdj266r.x11i5rnm.xat24cr.x1mh8g0r.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x1n2onr6.xggy1nq.x11njtxf")
+                    if creatordescpost:
+                        creatordesc = creatordescpost.find('h1')
+                        creatorname = creatordescpost.find('h2')
+                        print(creatordesc)
+                        print(creatorname)
 
 
 
@@ -112,8 +117,7 @@ def insta_soup(request):
     driver.execute_script("window.scrollTo(0, 700)")
     time.sleep(3)
 
-
-
+    """
     for l in range(1, 9):
         for m in range(1, 4):
                     #f'//*[@id="{idstring}"]/div/div/div[1]/div/div/div/div[1]/div[1]/div[2]/section/main/article/div[2]/div/div[{l}]/div[{m}]/'
@@ -123,8 +127,8 @@ def insta_soup(request):
             time.sleep(3)
             temp_post = Post()
             temp_postimg = PostImg()  # 새로운 이미지 저장할 그릇 생성
-            temp_post.save()  # 한번 세이브 해서 일단 Post db에 새로운 데이터 생성
-            temp_postimg.save()
+            # temp_post.save()  # 한번 세이브 해서 일단 Post db에 새로운 데이터 생성
+            # temp_postimg.save()
             # 클릭을 한번 해서 뜬 곳
             # temp_postimg = PostImg()  # 새로운 이미지 저장할 그릇 생성
             item_soup = BeautifulSoup(driver.page_source, "html.parser")
@@ -160,8 +164,6 @@ def insta_soup(request):
 
         driver.execute_script("window.scrollTo(0, 700)")
         time.sleep(3)
-
-        """
             temp_post = Post()  # models 의 Post 호출
             temp_post.save() #한번 세이브해서 일단 Post db에 새로운 데이터 생성
             #  ------------------------
@@ -170,6 +172,5 @@ def insta_soup(request):
             temp_postimg.save()
             temp_post.img_list.add(temp_postimg)
             temp_post.save()
-            """
-    return item_soup
-
+        """
+    return HttpResponse("Done Crawl")
