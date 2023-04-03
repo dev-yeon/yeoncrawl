@@ -15,4 +15,5 @@ class PostImg(models.Model):
     img_url = models.CharField(max_length=300,null=True, blank=True)
     img_alt = models.TextField(null=True, blank=True)
     img_name = models.CharField(max_length=100, null=True, blank=True)
+    img_tag = models.CharField(max_length=100, null=True, blank=True)
 
