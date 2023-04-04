@@ -38,6 +38,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'yeoncrawl'
+    # another apps 
+    # 'drf_yasg',  # drf_yasg
+    # 'rest_framework',  #  djangorestframework
+    # another apps
+
 ]
 
 MIDDLEWARE = [
