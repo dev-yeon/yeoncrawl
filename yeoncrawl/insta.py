@@ -32,6 +32,20 @@ def bulk_direct_postimg(request):
     response = helpers.bulk(es, gen_postimg("insta_postimg"))
     return HttpResponse(f'bulk to es Done with {response}')
 
+def search(request):
+    keyword = request.POST.get("keyword")
+    es = Elasticsearch(hosts=elasticsearch_hosts, post=port, http_auth=auth)
+    index = "insta_postimg"
+    body = {
+        'size': 1000,
+        'query': {
+            'match': {
+                "img_tag": keyword
+            }
+        }
+    }
+    res = es.search(index=index, body=body)
+    return res
 
 def instagram_login():
     chrome_options = Options()
