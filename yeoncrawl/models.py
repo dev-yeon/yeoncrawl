@@ -7,8 +7,10 @@ class Post(models.Model):
     author_id = models.CharField(max_length=100,null=True, blank=True)
     location = models.CharField(max_length=300,null=True, blank=True)
     like_count = models.IntegerField(null=True, blank=True)
+    like_string = models.CharField(max_length=100, null=True, blank=True)
     post_date = models.DateField(null=True, blank=True)
     img_list = models.ManyToManyField('PostImg',  blank=True)
+    post_tag = models.CharField(max_length=100, blank=True, null=True)
 
 
 class PostImg(models.Model):

@@ -7,9 +7,10 @@ from bs4 import BeautifulSoup
 from selenium.webdriver.chrome.options import Options
 from selenium import webdriver
 import time
+from selenium.webdriver import ActionChains
 import os
 from .models import Post, PostImg
-from .serializers import PostImgSerializer
+from .serializers import PostSerializer
 
 port = 9200
 elasticsearch_hosts = [
@@ -18,29 +19,29 @@ elasticsearch_hosts = [
 elasticsearch_id = 'yeon'
 elasticsearch_password = 'Yeon123!'
 auth = (elasticsearch_id, elasticsearch_password)
-def gen_postimg(index):
-    postimgs = PostImg.objects.all()
-    for postimg in postimgs:
-        serializers = PostImgSerializer(postimg)
+def gen_post(index):
+    posts = Post.objects.all()
+    for post in posts:
+        serializers = PostSerializer(post)
         result = serializers.data
         result.update({"_index": index})
-        result.update({"_id": postimg.id})
+        result.update({"_id": post.id})
         yield result
 
-def bulk_direct_postimg(request):
-    es = Elasticsearch(hosts=elasticsearch_hosts, post=port, http_auth=auth)
-    response = helpers.bulk(es, gen_postimg("insta_postimg"))
+def bulk_direct_post(request):
+    es = Elasticsearch(hosts=elasticsearch_hosts, post=port, http_auth=auth, timeout=30)
+    response = helpers.bulk(es, gen_post("insta_post"))
     return HttpResponse(f'bulk to es Done with {response}')
 
 def search(request):
     keyword = request.POST.get("keyword")
     es = Elasticsearch(hosts=elasticsearch_hosts, post=port, http_auth=auth)
-    index = "insta_postimg"
+    index = "insta_post"
     body = {
         'size': 1000,
         'query': {
             'match': {
-                "img_tag": keyword
+                "post_tag": keyword
             }
         }
     }
@@ -76,7 +77,7 @@ def insta_soup(request):
     hashtag_list = data.HASH_TAG_LIST
     for hashtag in hashtag_list:
         driver.get(f"{data.CONTENT_URL}{hashtag}/")
-        time.sleep(15)
+        time.sleep(11)
         # 게시물 가져오기
         divs = driver.find_elements(By.TAG_NAME, "div")
         idstring=""
@@ -86,13 +87,14 @@ def insta_soup(request):
                 break
         print(idstring)
         #게시물 가져오기
-        driver.execute_script("window.scrollTo(0, 700)")
+        driver.execute_script("window.scrollTo(0, 300)")
         duplicate_list = []
         for j in range(1, 4):
-            driver.execute_script("window.scrollTo(0, 700)")
             for k in range(1, 4):
                 i_path = f'//*[@id="{idstring}"]/div/div/div[1]/div/div/div/div[1]/div[1]/div[2]/section/main/article/div[1]/div/div/div[{j}]/div[{k}]'
                 i_button = driver.find_element(By.XPATH, i_path)
+                action = ActionChains(driver)
+                action.move_to_element(i_button).perform()
                 i_button.click()
                 time.sleep(3)
                 """
@@ -106,6 +108,29 @@ def insta_soup(request):
                 # 클릭을 한번 해서 뜬 곳
                 item_soup = BeautifulSoup(driver.page_source, "html.parser")
                 # BeautifulSoup로  클릭 해서 뜬 곳 html
+                temp_post = Post(post_tag=hashtag)
+                h1names = item_soup.select("h1", class_="_aacl._aaco._aacu._aacx._aad7._aade")
+                temp_desc = ""
+                for h1name in h1names:
+                    temp_desc += h1name.text.strip()
+                temp_post.post_desc = temp_desc
+                creatordivs = item_soup.select("div", class_="_a9zr")
+                for creatordiv in creatordivs:
+                    divnames = creatordiv.select("h2", class_="_a9zc")
+                    for i, divname in enumerate(divnames):
+                        creatorname = divname.text.strip()
+                        if not creatorname.__contains__("인기"):
+                            if not creatorname.__contains__("최근"):
+                                temp_post.author_id = creatorname
+                likesections = item_soup.select("section", class_="_ae5m._ae5n._ae5o")
+                likestr = ""
+                for likesection in likesections:
+                    likestrings = likesection.select("span",
+                                                     class_="x193iq5w.xeuugli.x1fj9vlw.x13faqbe.x1vvkbs.xt0psk2.x1i0vuye.xvs91rp.x1s688f.x5n08af.x10wh9bi.x1wdrske.x8viiok.x18hxmgj")
+                    for likestring in likestrings:
+                        likestr = likestring.text.strip()
+                temp_post.like_string = likestr
+                temp_post.save()
                 postimglist = item_soup.select("ul", class_="_acay")
                 for postimg in postimglist:
                     # if postimg:
@@ -114,28 +139,16 @@ def insta_soup(request):
                             temp_postimg = PostImg()
                             temp_postimg.img_url = img["src"]
                             temp_postimg.img_alt = img["alt"]
-                            temp_postimg.img_tag = data.HASH_TAG
+                            temp_postimg.img_tag = hashtag
                             if not temp_postimg.img_alt.__contains__("프로필"):
                                 if not temp_postimg.img_alt in duplicate_list:
                                     temp_postimg.save()
                                     duplicate_list.append(img["alt"])
-                postdescs = item_soup.select("ul", class_="_a9z6._a9za")
-                if postdescs:
-                    for postdesc in postdescs:
-                        desclist = postdesc.findAll('ul', class_="_a9ym")
-                        creatordescpost = postdesc.find('div', class_="x1qjc9v5.x6umtig.x1b1mbwd.xaqea5y.xav7gou.x9f619.x78zum5.xdt5ytf.x2lah0s.xk390pu.xdj266r.x11i5rnm.xat24cr.x1mh8g0r.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x1n2onr6.xggy1nq.x11njtxf")
-                        if creatordescpost:
-                            creatordesc = creatordescpost.find('h1')
-                            creatorname = creatordescpost.find('h2')
-                            print(creatordesc)
-                            print(creatorname)
-
-
-
+                                    temp_post.img_list.add(temp_postimg)
+                                    temp_post.save()
                 driver.back()
+                time.sleep(1)
                 # 인기 게시글을 보기위한  스크롤 내리기 구현
-            driver.execute_script("window.scrollTo(0, 700)")
-            time.sleep(3)
 
         # for l in range(1, 9):
         #     for m in range(1, 4):

@@ -22,6 +22,6 @@ import yeoncrawl.views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('insta/', yeoncrawl.insta.insta_soup),
-    path('bulk/', yeoncrawl.insta.bulk_direct_postimg)
+    path('bulk/', yeoncrawl.insta.bulk_direct_post)
 ]
 
