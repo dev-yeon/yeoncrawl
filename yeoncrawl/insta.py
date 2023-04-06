@@ -73,86 +73,92 @@ def instagram_login():
 def insta_soup(request):
     driver = instagram_login()
     # 해시태그 검색
-    driver.get(f"{data.CONTENT_URL}{data.HASH_TAG}/")
-    time.sleep(15)
-    # 게시물 가져오기
-    divs = driver.find_elements(By.TAG_NAME, "div")
-    idstring=""
-    for div in divs:
-        idstring =div.get_attribute("id")
-        if idstring.startswith("mount"):
-            break
-    print(idstring)
-    #게시물 가져오기
-    driver.execute_script("window.scrollTo(0, 700)")
-    for j in range(1, 4):
-        for k in range(1, 4):
-            i_path = f'//*[@id="{idstring}"]/div/div/div[1]/div/div/div/div[1]/div[1]/div[2]/section/main/article/div[1]/div/div/div[{j}]/div[{k}]'
-            i_button = driver.find_element(By.XPATH, i_path)
-            i_button.click()
-            time.sleep(3)
-            """
-            temp_post = Post()
-            data.STD_IMG_URL 
-            temp_postimg = PostImg()   # 새로운 이미지 저장할 그릇 생성
-            temp_post.save()  # 한번 세이브 해서 일단 Post db에 새로운 데이터 생성
-            temp_postimg.save()
-            """
-
-            # 클릭을 한번 해서 뜬 곳
-            item_soup = BeautifulSoup(driver.page_source, "html.parser")
-            # BeautifulSoup로  클릭 해서 뜬 곳 html
-            postimglist = item_soup.select("ul", class_="_acay")
-            for postimg in postimglist:
-                # if postimg:
-                    img_list = postimg.findAll('img')
-                    for img in img_list:
-                        temp_postimg = PostImg()
-                        temp_postimg.img_url = img["src"]
-                        temp_postimg.img_alt = img["alt"]
-                        temp_postimg.img_tag = data.HASH_TAG
-                        if not temp_postimg.img_alt.__contains__("프로필"):
-                            temp_postimg.save()
-            postdescs = item_soup.select("ul", class_="_a9z6._a9za")
-            if postdescs:
-                for postdesc in postdescs:
-                    desclist = postdesc.findAll('ul', class_="_a9ym")
-                    creatordescpost = postdesc.find('div', class_="x1qjc9v5.x6umtig.x1b1mbwd.xaqea5y.xav7gou.x9f619.x78zum5.xdt5ytf.x2lah0s.xk390pu.xdj266r.x11i5rnm.xat24cr.x1mh8g0r.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x1n2onr6.xggy1nq.x11njtxf")
-                    if creatordescpost:
-                        creatordesc = creatordescpost.find('h1')
-                        creatorname = creatordescpost.find('h2')
-                        print(creatordesc)
-                        print(creatorname)
-
-
-
-            driver.back()
-            # 인기 게시글을 보기위한  스크롤 내리기 구현
-    driver.execute_script("window.scrollTo(0, 700)")
-    time.sleep(3)
-
-    for l in range(1, 9):
-        for m in range(1, 4):
-                    #f'//*[@id="{idstring}"]/div/div/div[1]/div/div/div/div[1]/div[1]/div[2]/section/main/article/div[2]/div/div[{l}]/div[{m}]/'
-            i_path = f'//*[@id="{idstring}"]/div/div/div[1]/div/div/div/div[1]/div[1]/div[2]/section/main/article/div[2]/div/div[{l}]/div[{m}]'
-            i_button = driver.find_element(By.XPATH, i_path)
-            i_button.click()
-            time.sleep(3)
-            item_soup = BeautifulSoup(driver.page_source, "html.parser")
-
-            postimglist = item_soup.select("ul", class_="_acay")
-            for postimg in postimglist:
-                        # if postimg:
-                img_list = postimg.findAll('img')
-                for img in img_list:
-                    temp_postimg = PostImg()
-                    temp_postimg.img_url = img["src"]
-                    temp_postimg.img_alt = img["alt"]
-                    temp_postimg.img_tag = data.HASH_TAG
-                    if not temp_postimg.img_alt.__contains__("프로필"):
-                        temp_postimg.save()
-            driver.back()
-
+    hashtag_list = data.HASH_TAG_LIST
+    for hashtag in hashtag_list:
+        driver.get(f"{data.CONTENT_URL}{hashtag}/")
+        time.sleep(15)
+        # 게시물 가져오기
+        divs = driver.find_elements(By.TAG_NAME, "div")
+        idstring=""
+        for div in divs:
+            idstring =div.get_attribute("id")
+            if idstring.startswith("mount"):
+                break
+        print(idstring)
+        #게시물 가져오기
         driver.execute_script("window.scrollTo(0, 700)")
+        duplicate_list = []
+        for j in range(1, 4):
+            driver.execute_script("window.scrollTo(0, 700)")
+            for k in range(1, 4):
+                i_path = f'//*[@id="{idstring}"]/div/div/div[1]/div/div/div/div[1]/div[1]/div[2]/section/main/article/div[1]/div/div/div[{j}]/div[{k}]'
+                i_button = driver.find_element(By.XPATH, i_path)
+                i_button.click()
+                time.sleep(3)
+                """
+                temp_post = Post()
+                data.STD_IMG_URL 
+                temp_postimg = PostImg()   # 새로운 이미지 저장할 그릇 생성
+                temp_post.save()  # 한번 세이브 해서 일단 Post db에 새로운 데이터 생성
+                temp_postimg.save()
+                """
+
+                # 클릭을 한번 해서 뜬 곳
+                item_soup = BeautifulSoup(driver.page_source, "html.parser")
+                # BeautifulSoup로  클릭 해서 뜬 곳 html
+                postimglist = item_soup.select("ul", class_="_acay")
+                for postimg in postimglist:
+                    # if postimg:
+                        img_list = postimg.findAll('img')
+                        for img in img_list:
+                            temp_postimg = PostImg()
+                            temp_postimg.img_url = img["src"]
+                            temp_postimg.img_alt = img["alt"]
+                            temp_postimg.img_tag = data.HASH_TAG
+                            if not temp_postimg.img_alt.__contains__("프로필"):
+                                if not temp_postimg.img_alt in duplicate_list:
+                                    temp_postimg.save()
+                                    duplicate_list.append(img["alt"])
+                postdescs = item_soup.select("ul", class_="_a9z6._a9za")
+                if postdescs:
+                    for postdesc in postdescs:
+                        desclist = postdesc.findAll('ul', class_="_a9ym")
+                        creatordescpost = postdesc.find('div', class_="x1qjc9v5.x6umtig.x1b1mbwd.xaqea5y.xav7gou.x9f619.x78zum5.xdt5ytf.x2lah0s.xk390pu.xdj266r.x11i5rnm.xat24cr.x1mh8g0r.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x1n2onr6.xggy1nq.x11njtxf")
+                        if creatordescpost:
+                            creatordesc = creatordescpost.find('h1')
+                            creatorname = creatordescpost.find('h2')
+                            print(creatordesc)
+                            print(creatorname)
+
+
+
+                driver.back()
+                # 인기 게시글을 보기위한  스크롤 내리기 구현
+            driver.execute_script("window.scrollTo(0, 700)")
+            time.sleep(3)
+
+        # for l in range(1, 9):
+        #     for m in range(1, 4):
+        #                 #f'//*[@id="{idstring}"]/div/div/div[1]/div/div/div/div[1]/div[1]/div[2]/section/main/article/div[2]/div/div[{l}]/div[{m}]/'
+        #         i_path = f'//*[@id="{idstring}"]/div/div/div[1]/div/div/div/div[1]/div[1]/div[2]/section/main/article/div[2]/div/div[{l}]/div[{m}]'
+        #         i_button = driver.find_element(By.XPATH, i_path)
+        #         i_button.click()
+        #         time.sleep(3)
+        #         item_soup = BeautifulSoup(driver.page_source, "html.parser")
+        #
+        #         postimglist = item_soup.select("ul", class_="_acay")
+        #         for postimg in postimglist:
+        #                     # if postimg:
+        #             img_list = postimg.findAll('img')
+        #             for img in img_list:
+        #                 temp_postimg = PostImg()
+        #                 temp_postimg.img_url = img["src"]
+        #                 temp_postimg.img_alt = img["alt"]
+        #                 temp_postimg.img_tag = data.HASH_TAG
+        #                 if not temp_postimg.img_alt.__contains__("프로필"):
+        #                     temp_postimg.save()
+        #         driver.back()
+        #
+        #     driver.execute_script("window.scrollTo(0, 700)")
 
     return HttpResponse("Done Crawl")
