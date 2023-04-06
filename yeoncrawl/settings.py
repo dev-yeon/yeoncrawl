@@ -38,7 +38,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'yeoncrawl',
-    'rest_framework',
     'drf_yasg',
 ]
 

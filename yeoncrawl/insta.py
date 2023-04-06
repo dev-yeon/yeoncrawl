@@ -11,6 +11,10 @@ from selenium.webdriver import ActionChains
 import os
 from .models import Post, PostImg
 from .serializers import PostSerializer
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
 
 port = 9200
 elasticsearch_hosts = [
@@ -19,6 +23,9 @@ elasticsearch_hosts = [
 elasticsearch_id = 'yeon'
 elasticsearch_password = 'Yeon123!'
 auth = (elasticsearch_id, elasticsearch_password)
+keyword = openapi.Parameter('keyword', openapi.IN_QUERY, description="키워드", type=openapi.TYPE_STRING)
+
+
 def gen_post(index):
     posts = Post.objects.all()
     for post in posts:
@@ -28,11 +35,36 @@ def gen_post(index):
         result.update({"_id": post.id})
         yield result
 
+
 def bulk_direct_post(request):
     es = Elasticsearch(hosts=elasticsearch_hosts, post=port, http_auth=auth, timeout=30)
     response = helpers.bulk(es, gen_post("insta_post"))
     return HttpResponse(f'bulk to es Done with {response}')
 
+
+@swagger_auto_schema(
+    method='post',
+    operation_id='키워드 검색',
+    operation_description='키워드로 검색 후 해당 결과 반환합니다.',
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'keyword': openapi.Schema(type=openapi.TYPE_STRING, description="검색어"),
+        }
+    ),
+    tags=['검색'],
+    responses={200: openapi.Response(
+        description="200 OK",
+        schema=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'result': openapi.Schema(type=openapi.TYPE_OBJECT, description="Search result"),
+            }
+        )
+    )}
+)
+@api_view(['POST'])
+@permission_classes([AllowAny])
 def search(request):
     keyword = request.POST.get("keyword")
     es = Elasticsearch(hosts=elasticsearch_hosts, post=port, http_auth=auth)
@@ -119,9 +151,10 @@ def insta_soup(request):
                     divnames = creatordiv.select("h2", class_="_a9zc")
                     for i, divname in enumerate(divnames):
                         creatorname = divname.text.strip()
-                        if not creatorname.__contains__("인기"):
-                            if not creatorname.__contains__("최근"):
-                                temp_post.author_id = creatorname
+                        if creatorname is not None and creatorname != "":
+                            if not creatorname.__contains__("인기"):
+                                if not creatorname.__contains__("최근"):
+                                    temp_post.author_id = creatorname
                 likesections = item_soup.select("section", class_="_ae5m._ae5n._ae5o")
                 likestr = ""
                 for likesection in likesections:
