@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 from selenium.webdriver.chrome.options import Options
 from selenium import webdriver
 import time
+from django.http import JsonResponse
 from selenium.webdriver import ActionChains
 import os
 from .models import Post, PostImg
@@ -66,19 +67,19 @@ def bulk_direct_post(request):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def search(request):
-    keyword = request.POST.get("keyword")
+    search_word = request.data['keyword']
     es = Elasticsearch(hosts=elasticsearch_hosts, post=port, http_auth=auth)
     index = "insta_post"
     body = {
         'size': 1000,
         'query': {
             'match': {
-                "post_tag": keyword
+                "post_tag": search_word
             }
         }
     }
     res = es.search(index=index, body=body)
-    return res
+    return JsonResponse(res)
 
 def instagram_login():
     chrome_options = Options()
