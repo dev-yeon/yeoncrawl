@@ -124,7 +124,7 @@ def insta_soup(request):
         duplicate_list = []
         for j in range(1, 4):
             for k in range(1, 4):
-                i_path = f'//*[@id="{idstring}"]/div/div/div[1]/div/div/div/div[1]/div[1]/div[2]/section/main/article/div[1]/div/div/div[{j}]/div[{k}]'
+                i_path = f'//*[@id="{idstring}"]/div/div/div[2]/div/div/div/div[1]/div[1]/div[2]/section/main/article/div/div/div/div[{j}]/div[{k}]'
                 i_button = driver.find_element(By.XPATH, i_path)
                 action = ActionChains(driver)
                 action.move_to_element(i_button).perform()
