@@ -1,4 +1,15 @@
+import hashlib
+import base64
 from django.db import models
+import random
+import os
+import datetime
+
+
+def user_directory_path(instance, filename):
+    now = datetime.datetime.now()
+    path = "{date}/{filename}".format(date=str(now.date()), filename=filename,)
+    return path
 
 
 class Post(models.Model):
@@ -15,6 +26,7 @@ class Post(models.Model):
 
 class PostImg(models.Model):
     img_url = models.CharField(max_length=300,null=True, blank=True)
+    image_url = models.ImageField(blank=True, null=True, upload_to=user_directory_path)
     img_alt = models.TextField(null=True, blank=True)
     img_name = models.CharField(max_length=100, null=True, blank=True)
     img_tag = models.CharField(max_length=100, null=True, blank=True)

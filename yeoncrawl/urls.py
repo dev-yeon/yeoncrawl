@@ -43,6 +43,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('insta/', yeoncrawl.insta.insta_soup),
     path('bulk/', yeoncrawl.insta.bulk_direct_post),
+    path('deleteall/', yeoncrawl.insta.delete_all),
     path('search/', yeoncrawl.insta.search)
 ]
 

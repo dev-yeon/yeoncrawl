@@ -7,15 +7,18 @@ from bs4 import BeautifulSoup
 from selenium.webdriver.chrome.options import Options
 from selenium import webdriver
 import time
+import requests
 from django.http import JsonResponse
 from selenium.webdriver import ActionChains
-import os
+from io import BytesIO
 from .models import Post, PostImg
 from .serializers import PostSerializer
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
+from PIL import Image
+from django.core.files.base import ContentFile
 
 port = 9200
 elasticsearch_hosts = [
@@ -169,13 +172,15 @@ def insta_soup(request):
                 for postimg in postimglist:
                     # if postimg:
                         img_list = postimg.findAll('img')
-                        for img in img_list:
+                        for i, img in enumerate(img_list):
                             temp_postimg = PostImg()
                             temp_postimg.img_url = img["src"]
+                            response = requests.get(temp_postimg.img_url, stream=True)
                             temp_postimg.img_alt = img["alt"]
                             temp_postimg.img_tag = hashtag
                             if not temp_postimg.img_alt.__contains__("프로필"):
                                 if not temp_postimg.img_alt in duplicate_list:
+                                    temp_postimg.image_url.save(f'{hashtag}{i}.png', ContentFile(response.content))
                                     temp_postimg.save()
                                     duplicate_list.append(img["alt"])
                                     temp_post.img_list.add(temp_postimg)
@@ -209,3 +214,9 @@ def insta_soup(request):
         #     driver.execute_script("window.scrollTo(0, 700)")
 
     return HttpResponse("Done Crawl")
+
+
+def delete_all(request):
+    Post.objects.all().delete()
+    PostImg.objects.all().delete()
+    return HttpResponse("Done Delete")
