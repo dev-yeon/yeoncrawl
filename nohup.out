@@ -1,0 +1,61 @@
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Error: That port is already in use.
+Watching for file changes with StatReloader
+Error: That port is already in use.
+Watching for file changes with StatReloader
+Error: That port is already in use.
+Watching for file changes with StatReloader
+Error: That port is already in use.
+/Users/yeon/PycharmProjects/yeoncrawl/yeoncrawl/metadata.py changed, reloading.
+Performing system checks...
+
+System check identified no issues (0 silenced).
+April 13, 2023 - 04:03:37
+Django version 4.1.7, using settings 'yeoncrawl.settings'
+Starting development server at http://127.0.0.1:8000/
+Quit the server with CONTROL-C.
+Watching for file changes with StatReloader
+
+
+
+
+Python 3.9.6 (default, Mar 10 2023, 20:16:38) 
+[Clang 14.0.3 (clang-1403.0.22.14.1)] on darwin
+Type "help", "copyright", "credits" or "license" for more information.
+>>> >>> >>> >>> 
+KeyboardInterrupt
+>>> >>> [13/Apr/2023 04:09:20] "GET /swagger/ HTTP/1.1" 200 2476
+[13/Apr/2023 04:09:20] "GET /swagger/?format=openapi HTTP/1.1" 200 1002
+[13/Apr/2023 04:09:21] "GET /swagger/ HTTP/1.1" 200 2476
+[13/Apr/2023 04:09:21] "GET /swagger/?format=openapi HTTP/1.1" 200 1002
+[13/Apr/2023 04:09:21] "GET /swagger/ HTTP/1.1" 200 2476
+[13/Apr/2023 04:09:21] "GET /swagger/?format=openapi HTTP/1.1" 200 1002
+[13/Apr/2023 04:09:21] "GET /swagger/ HTTP/1.1" 200 2476
+[13/Apr/2023 04:09:22] "GET /swagger/?format=openapi HTTP/1.1" 200 1002
+[13/Apr/2023 04:09:22] "GET /swagger/ HTTP/1.1" 200 2476
+[13/Apr/2023 04:09:22] "GET /swagger/?format=openapi HTTP/1.1" 200 1002
+[13/Apr/2023 04:09:22] "GET /swagger/ HTTP/1.1" 200 2476
+[13/Apr/2023 04:09:22] "GET /swagger/?format=openapi HTTP/1.1" 200 1002
+
+Not Found: /
+[13/Apr/2023 04:11:39] "GET / HTTP/1.1" 404 2915
+[13/Apr/2023 04:11:42] "GET /swagger/ HTTP/1.1" 200 2476
+[13/Apr/2023 04:11:42] "GET /swagger/?format=openapi HTTP/1.1" 200 1002
+Not Found: /
+[13/Apr/2023 04:13:40] "GET / HTTP/1.1" 404 2915
+Not Found: /favicon.ico
+[13/Apr/2023 04:13:40] "GET /favicon.ico HTTP/1.1" 404 2966
+[13/Apr/2023 04:13:44] "GET /swagger/ HTTP/1.1" 200 2476
+[13/Apr/2023 04:13:44] "GET /swagger/?format=openapi HTTP/1.1" 200 1002
+Not Found: /
+[13/Apr/2023 04:14:51] "GET / HTTP/1.1" 404 2915
+[13/Apr/2023 04:15:20] "GET /swagger/ HTTP/1.1" 200 2476
+[13/Apr/2023 04:15:20] "GET /swagger/?format=openapi HTTP/1.1" 200 1002
+Performing system checks...
+
+System check identified no issues (0 silenced).
+April 13, 2023 - 04:07:39
+Django version 4.1.7, using settings 'yeoncrawl.settings'
+Starting development server at http://127.0.0.1:8000/
+Quit the server with CONTROL-C.
